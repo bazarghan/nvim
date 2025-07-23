@@ -68,7 +68,7 @@ return {
             settings = {
               python = {
                 analysis = {
-                  -- This is the key setting. It turns off all type-checking rules.
+                  -- It turns off all type-checking rules.
                   typeCheckingMode = "off",
                 },
               },
