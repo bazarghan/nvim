@@ -37,6 +37,22 @@ map("n", "<leader>cc", function()
   vim.cmd("bdelete")
 end, { desc = "Save if modified and close buffer" })
 
+-- Bulk-close buffers
+map("n", "<leader>io", function()
+  -- Get all buffer numbers
+  local bufs = vim.api.nvim_list_bufs()
+  -- Get the current buffer number
+  local current_buf = vim.api.nvim_get_current_buf()
+
+  for _, bufnr in ipairs(bufs) do
+    -- Check if the buffer is loaded, listed, and not the current one
+    if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].buflisted and bufnr ~= current_buf then
+      vim.cmd("bdelete " .. bufnr)
+    end
+  end
+  vim.notify("Closed all other buffers", vim.log.levels.INFO, { title = "Buffers" })
+end, { desc = "Close all buffers but the current one" })
+
 -- Navigate to the previous buffer
 map("n", "<M-s>", ":bprevious<CR>", { desc = "Go to previous buffer" })
 map("n", "<M-right-s>", ":bprevious<CR>", { desc = "Go to previous buffer" })
