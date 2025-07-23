@@ -29,24 +29,13 @@ map("n", "<leader>bb", ":bufdo bdelete!<CR>")
 map("n", "<leader>s", ":w<CR>")
 
 map("n", "<leader>cc", function()
-  vim.cmd("write")
-  if #vim.api.nvim_list_wins() > 1 then
-    vim.cmd("close")
-    vim.cmd("bdelete")
-  else
-    local current_buf = vim.api.nvim_get_current_buf()
-    vim.cmd("bdelete")
-
-    local buffers = vim.api.nvim_list_bufs()
-    for i = #buffers, 1, -1 do
-      local buf = buffers[i]
-      if vim.fn.buflisted(buf) == 1 and buf ~= current_buf then
-        vim.cmd("buffer " .. buf)
-        return
-      end
-    end
+  local current_buf = vim.api.nvim_get_current_buf()
+  local is_modified = vim.bo[current_buf].modified
+  if is_modified then
+    vim.cmd("write")
   end
-end, { desc = "Save, close current split, and switch to previous buffer if needed" })
+  vim.cmd("bdelete")
+end, { desc = "Save if modified and close buffer" })
 
 -- Navigate to the previous buffer
 map("n", "<M-s>", ":bprevious<CR>", { desc = "Go to previous buffer" })

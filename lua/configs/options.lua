@@ -13,7 +13,7 @@ opt.relativenumber = true
 opt.number = true
 
 -- Tabs & indentation
-opt.tabstop = 4 -- 2 spaces for tabs
+opt.tabstop = 2 -- 2 spaces for tabs
 opt.shiftwidth = 2 -- 2 spaces for indent width
 opt.expandtab = true -- Expand tab to spaces
 opt.autoindent = true -- Copy indent from current line when starting new one

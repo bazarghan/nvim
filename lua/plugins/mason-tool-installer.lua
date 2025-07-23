@@ -1,3 +1,4 @@
+-- File: nvim/lua/plugins/mason-tool-installer.lua
 return {
   "WhoIsSethDaniel/mason-tool-installer.nvim",
   dependencies = {
@@ -8,8 +9,7 @@ return {
       ensure_installed = {
         "prettier",
         "stylua",
-        "isort", -- Python formatter
-        "black", -- Python formatter
+        "ruff", -- For Python formatting
       },
     })
   end,
