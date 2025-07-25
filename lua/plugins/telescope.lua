@@ -1,5 +1,3 @@
--- File: nvim/lua/plugins/telescope.lua
-
 return {
   "nvim-telescope/telescope.nvim",
   branch = "0.1.x",
@@ -13,63 +11,35 @@ return {
     local actions = require("telescope.actions")
     local action_state = require("telescope.actions.state")
 
-    -- Custom actions for copying data
-    local function copy_diagnostic_message(prompt_bufnr)
-      local selection = action_state.get_selected_entry()
-      if selection and selection.text then
-        vim.fn.setreg("+", selection.text)
-        vim.notify("Copied diagnostic message to clipboard", vim.log.levels.INFO, { title = "Telescope" })
-      end
-    end
+    ---
+    -- NEW VERSION of the custom action
+    ---
+    local function copy_full_diagnostics(prompt_bufnr)
+      -- This new version gets the "picker" first, which is more robust.
+      local picker = action_state.get_current_picker(prompt_bufnr)
+      local multi_selection = picker:get_multi_selection()
+      local text_to_copy
 
-    local function copy_filename(prompt_bufnr)
-      local selection = action_state.get_selected_entry()
-      if selection and selection.filename then
-        vim.fn.setreg("+", selection.filename)
-        vim.notify("Copied filename to clipboard", vim.log.levels.INFO, { title = "Telescope" })
-      end
-    end
-
-    local function copy_multi_diagnostic_messages(prompt_bufnr)
-      local multi_selection = action_state.get_multi_selection()
-      if #multi_selection == 0 then
-        copy_diagnostic_message(prompt_bufnr)
-        return
-      end
-      local messages = {}
-      for _, selection in ipairs(multi_selection) do
-        table.insert(messages, selection.text)
-      end
-      local full_text = table.concat(messages, "\n")
-      vim.fn.setreg("+", full_text)
-      vim.notify(
-        "Copied " .. #multi_selection .. " diagnostic messages to clipboard",
-        vim.log.levels.INFO,
-        { title = "Telescope" }
-      )
-    end
-
-    local function copy_multi_filenames(prompt_bufnr)
-      local multi_selection = action_state.get_multi_selection()
-      if #multi_selection == 0 then
-        copy_filename(prompt_bufnr)
-        return
-      end
-      local filenames = {}
-      local seen = {}
-      for _, selection in ipairs(multi_selection) do
-        if not seen[selection.filename] then
-          table.insert(filenames, selection.filename)
-          seen[selection.filename] = true
+      if #multi_selection > 0 then
+        local lines = {}
+        for _, selection in ipairs(multi_selection) do
+          local line = string.format("%s:%d:%d: %s", selection.filename, selection.lnum, selection.col, selection.text)
+          table.insert(lines, line)
+        end
+        text_to_copy = table.concat(lines, "\n")
+      else
+        -- Fallback for single selection
+        local selection = action_state.get_selected_entry()
+        if selection then
+          text_to_copy =
+            string.format("%s:%d:%d: %s", selection.filename, selection.lnum, selection.col, selection.text)
         end
       end
-      local full_text = table.concat(filenames, "\n")
-      vim.fn.setreg("+", full_text)
-      vim.notify(
-        "Copied " .. #filenames .. " unique filenames to clipboard",
-        vim.log.levels.INFO,
-        { title = "Telescope" }
-      )
+
+      if text_to_copy then
+        vim.fn.setreg("+", text_to_copy)
+        vim.notify("Copied diagnostics to clipboard", vim.log.levels.INFO, { title = "Telescope" })
+      end
     end
 
     telescope.setup({
@@ -81,19 +51,14 @@ return {
             ["<A-q>"] = actions.close,
             ["<Tab>"] = actions.toggle_selection + actions.move_selection_next,
             ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_previous,
-            ["<C-e>"] = copy_multi_diagnostic_messages,
-            ["<C-p>"] = copy_multi_filenames,
+            ["<C-c>"] = copy_full_diagnostics,
           },
           n = {
             ["dd"] = actions.delete_buffer,
             ["<A-q>"] = actions.close,
-            ["<Tab>"] = actions.toggle_selection + actions.move_selection_next,
-            ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_previous,
-            ["<C-y>"] = copy_diagnostic_message,
-            ["yy"] = copy_diagnostic_message, -- YANK THE DIAGNOSTIC MESSAGE
-            ["<C-f>"] = copy_filename,
-            ["<C-e>"] = copy_multi_diagnostic_messages,
-            ["<C-p>"] = copy_multi_filenames,
+            ["s"] = actions.toggle_selection + actions.move_selection_next,
+            ["S"] = actions.toggle_selection + actions.move_selection_previous,
+            ["yy"] = copy_full_diagnostics,
           },
         },
       },
@@ -109,7 +74,6 @@ return {
 
     telescope.load_extension("fzf")
 
-    -- Your existing Telescope keymaps remain the same
     vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
     vim.keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
     vim.keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
