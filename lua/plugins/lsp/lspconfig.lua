@@ -42,7 +42,7 @@ return {
             analysis = {
               autoSearchPaths = true,
               useLibraryCodeForTypes = true,
-              typeCheckingMode = "strict", -- CHANGED from 'basic' to 'strict'
+              typeCheckingMode = "off",
             },
           },
         },
