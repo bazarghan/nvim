@@ -13,7 +13,7 @@ return {
         -- CORRECTED: Use the 'keymap' alias directly
         keymap("n", "gD", vim.lsp.buf.declaration, { desc = "Go to Declaration", buffer = bufnr })
         keymap("n", "gd", "<cmd>Telescope lsp_definitions<CR>", { desc = "Show LSP Definitions", buffer = bufnr })
-        keymap("n", "K", vim.lsp.buf.hover, { desc = "Show Hover Documentation", buffer = bufnr })
+        keymap("n", "gk", vim.lsp.buf.hover, { desc = "Show Hover Documentation", buffer = bufnr })
         keymap(
           "n",
           "gi",
