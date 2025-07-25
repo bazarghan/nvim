@@ -14,6 +14,5 @@ return {
   ---@type venv-selector.Config
   opts = {
     -- Your settings go here
-    auto_configure = false,
   },
 }
